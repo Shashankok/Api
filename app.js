@@ -18,8 +18,8 @@ const connectWithDatabase = async () => {
   }
 };
 
-app.use(bodyParser.json());
 app.use(cors());
+app.use(bodyParser.json());
 app.use(
   fileUpload({
     useTempFiles: true,
