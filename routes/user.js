@@ -57,7 +57,7 @@ Router.post("/login", async (req, res) => {
 
     if (users.length <= 0) {
       return res.status(500).json({
-        error: "email not found",
+        error: "Email not found",
       });
     }
 
@@ -68,7 +68,7 @@ Router.post("/login", async (req, res) => {
 
     if (!isValid) {
       return res.status(500).json({
-        message: "Login Failed, Wrong Password",
+        error: "Invalid Password",
       });
     }
 
@@ -106,7 +106,6 @@ Router.put("/subscribe/:userId", checkAuth, async (req, res) => {
     const requestingUser = await User.findById(user._id);
 
     if (requestedUser.subscribedBy.includes(user._id)) {
-      console.log("You are already a subscriber");
       return res.status(401).json({
         error: "Already a subscriber",
       });
@@ -117,7 +116,7 @@ Router.put("/subscribe/:userId", checkAuth, async (req, res) => {
       requestingUser.subscribedChannels.push(req.params.userId);
       await requestingUser.save();
       res.status(200).json({
-        subscribedStatus: "Subscribed",
+        message: "Subscribed",
       });
     }
   } catch (err) {
