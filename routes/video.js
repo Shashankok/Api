@@ -230,4 +230,17 @@ Router.put("/views/:videoId", async (req, res) => {
   }
 });
 
+Router.get("/", async (req, res) => {
+  try {
+    const video = await Video.find({});
+    console.log(video);
+    res.status(200).json({
+      videos: video,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err,
+    });
+  }
+});
 module.exports = Router;
