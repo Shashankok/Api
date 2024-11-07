@@ -5,7 +5,7 @@ const videoSchema = new mongoose.Schema(
     _id: mongoose.Schema.Types.ObjectId,
     title: { type: String, required: true },
     description: { type: String, required: true },
-    user_id: { type: String, required: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     video_url: { type: String, required: true },
     thumbnail_url: { type: String, required: true },
     videoId: { type: String, required: true },
