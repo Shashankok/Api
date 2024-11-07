@@ -232,7 +232,7 @@ Router.put("/views/:videoId", async (req, res) => {
 
 Router.get("/", async (req, res) => {
   try {
-    const video = await Video.find({});
+    const video = await Video.find().populate("user_id", "channelName logoUrl");
     console.log(video);
     res.status(200).json({
       videos: video,
