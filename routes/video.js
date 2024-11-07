@@ -40,6 +40,7 @@ Router.post("/upload", checkAuth, async (req, res) => {
       thumbnailId: uploadedThumbnail.public_id,
       category: req.body.category,
       tags: req.body.tags.split(","),
+      videoDuration: uploadedVideo.duration,
     });
 
     const newUploadedVideoData = await newVideo.save();
