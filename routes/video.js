@@ -231,6 +231,7 @@ Router.put("/views/:videoId", async (req, res) => {
   }
 });
 
+// Get all videos api
 Router.get("/", async (req, res) => {
   try {
     const video = await Video.find().populate("user_id", "channelName logoUrl");
@@ -244,4 +245,22 @@ Router.get("/", async (req, res) => {
     });
   }
 });
+
+//Get Video from videoId
+Router.get("/:videoId", async (req, res) => {
+  try {
+    const video = await Video.findById(req.params.videoId).populate(
+      "user_id",
+      "channelName logoUrl subscribers"
+    );
+    res.status(200).json({
+      video: video,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err,
+    });
+  }
+});
+
 module.exports = Router;
