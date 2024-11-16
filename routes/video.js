@@ -166,11 +166,16 @@ Router.put("/like/:videoId", checkAuth, async (req, res) => {
       video.likedBy.push(user._id);
       await video.save();
       res.status(200).json({
-        likedStatus: "video liked",
+        likeStatus: "liked",
       });
     } else {
-      res.status(400).json({
-        likeStatus: "Video Already Liked",
+      video.likes -= 1;
+      video.likedBy = video.likedBy.filter(
+        (id) => id.toString() !== user._id.toString()
+      );
+      await video.save();
+      res.status(200).json({
+        likeStatus: "like removed",
       });
     }
   } catch (err) {
@@ -200,11 +205,16 @@ Router.put("/dislike/:videoId", checkAuth, async (req, res) => {
       video.dislikedBy.push(user._id);
       await video.save();
       res.status(200).json({
-        dislikeStatus: "video disliked",
+        dislikeStatus: "disliked",
       });
     } else {
-      res.status(400).json({
-        likeStatus: "You have already disiked this video",
+      video.dislikes -= 1;
+      video.dislikedBy = video.dislikedBy.filter(
+        (userId) => userId.toString() !== user._id.toString()
+      );
+      await video.save();
+      res.status(200).json({
+        dislikeStatus: "dislike removed",
       });
     }
   } catch (err) {
@@ -251,8 +261,28 @@ Router.get("/:videoId", async (req, res) => {
   try {
     const video = await Video.findById(req.params.videoId).populate(
       "user_id",
-      "channelName logoUrl subscribers"
+      "channelName logoUrl subscribers subscribedBy"
     );
+    res.status(200).json({
+      video: video,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err,
+    });
+  }
+});
+
+//Get all videos for a user
+Router.get("/user/:userId", async (req, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.params.userId);
+
+    const video = await Video.find({ user_id: userId }).populate(
+      "user_id",
+      "channelName logoUrl subscribers subscribedBy"
+    );
+
     res.status(200).json({
       video: video,
     });

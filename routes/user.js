@@ -105,8 +105,15 @@ Router.put("/subscribe/:userId", checkAuth, async (req, res) => {
     const requestedUser = await User.findById(req.params.userId);
     const requestingUser = await User.findById(user._id);
 
+    // Check if the user is trying to subscribe to their own channel
+    if (user._id.toString() === req.params.userId.toString()) {
+      return res.status(400).json({
+        error: "You cannot subscribe to your own channel",
+      });
+    }
+
     if (requestedUser.subscribedBy.includes(user._id)) {
-      return res.status(401).json({
+      res.status(401).json({
         error: "Already a subscriber",
       });
     } else {
@@ -132,6 +139,18 @@ Router.put("/unsubscribe/:userId", checkAuth, async (req, res) => {
     const user = req.tokenInformation;
     const requestedUser = await User.findById(req.params.userId);
     const requestingUser = await User.findById(user._id);
+
+    // Check if the user is trying to unsubscribe from their own channel
+    if (user._id.toString() === req.params.userId.toString()) {
+      requestingUser.subscribedChannels =
+        requestingUser.subscribedChannels.filter(
+          (userId) => userId.toString() !== req.params.userId.toString()
+        );
+      await requestingUser.save();
+      return res.status(200).json({
+        subscribedStatus: "Self-subscription removed successfully",
+      });
+    }
 
     if (requestedUser.subscribedBy.includes(user._id)) {
       requestedUser.subscribers -= 1;
@@ -159,4 +178,27 @@ Router.put("/unsubscribe/:userId", checkAuth, async (req, res) => {
     });
   }
 });
+
+// Get subscribed channels by userId
+Router.get("/subscribed-channels/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId, {
+      subscribedChannels: 1,
+    });
+    const subscribedChannelIds = user.subscribedChannels;
+
+    // Fetch the user details for subscribed channels
+    const subscribedChannelDetails = await User.find(
+      { _id: { $in: subscribedChannelIds } },
+      { channelName: 1, logoUrl: 1, subscribers: 1 } // Project only the fields you need
+    );
+
+    res.status(200).json({ subscribedChannels: subscribedChannelDetails });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
+  }
+});
+
 module.exports = Router;
