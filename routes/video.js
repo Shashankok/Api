@@ -14,6 +14,23 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
+// Search Api
+Router.get("/search", async (req, res) => {
+  const { query } = req.query;
+  try {
+    const videos = await Video.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+      ],
+    }).populate("user_id", "channelName logoUrl subscribers subscribedBy");
+    res.status(200).json({ videos });
+  } catch (error) {
+    console.error("Error fetching search results:", error);
+    res.status(500).json({ message: "Failed to fetch search results" });
+  }
+});
+
 // Video Upload API
 Router.post("/upload", checkAuth, async (req, res) => {
   try {
@@ -241,21 +258,6 @@ Router.put("/views/:videoId", async (req, res) => {
   }
 });
 
-// Get all videos api
-Router.get("/", async (req, res) => {
-  try {
-    const video = await Video.find().populate("user_id", "channelName logoUrl");
-    console.log(video);
-    res.status(200).json({
-      videos: video,
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: err,
-    });
-  }
-});
-
 //Get Video from videoId
 Router.get("/:videoId", async (req, res) => {
   try {
@@ -284,7 +286,22 @@ Router.get("/user/:userId", async (req, res) => {
     );
 
     res.status(200).json({
-      video: video,
+      videos: video,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err,
+    });
+  }
+});
+
+// Get all videos api
+Router.get("/", async (req, res) => {
+  try {
+    const video = await Video.find().populate("user_id", "channelName logoUrl");
+    console.log(video);
+    res.status(200).json({
+      videos: video,
     });
   } catch (err) {
     res.status(500).json({

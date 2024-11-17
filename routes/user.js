@@ -201,4 +201,18 @@ Router.get("/subscribed-channels/:userId", async (req, res) => {
   }
 });
 
+// Get user details from userId
+
+Router.get("/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    // Fetch the user details for subscribed channels
+    res.status(200).json({ user: user });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
+  }
+});
+
 module.exports = Router;
