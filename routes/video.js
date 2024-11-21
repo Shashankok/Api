@@ -243,14 +243,23 @@ Router.put("/dislike/:videoId", checkAuth, async (req, res) => {
 });
 
 // Views API
-Router.put("/views/:videoId", async (req, res) => {
+Router.put("/views/:videoId", checkAuth, async (req, res) => {
   try {
     const video = await Video.findById(req.params.videoId);
-    video.views += 1;
-    await video.save();
-    res.status(200).json({
-      viewStatus: "View Increased",
-    });
+    const user = req.tokenInformation;
+
+    if (!video.viewedBy.includes(user._id)) {
+      video.views += 1;
+      video.viewedBy.push(user._id);
+      await video.save();
+      res.status(200).json({
+        viewStatus: "View Increased",
+      });
+    } else {
+      res.status(200).json({
+        viewStatus: "Already viewed",
+      });
+    }
   } catch (err) {
     res.status(500).json({
       error: err,
